@@ -61,6 +61,7 @@ Bundler will be run with:
 - database\_template: the name of the template that will be rendered to create the `database.yml` file; if specified it will be looked up in the application cookbook. Defaults to "database.yml.erb" from this cookbook
 - database: a block containing additional parameters for configuring the database connection
 - precompile\_assets: if true, precompile assets for the Rails 3 asset pipeline. The default is nil, in which case we will try to autodetect whether the pipeline is in use by looking for `config/assets.yml`
+- rbenv_version: if set, it specifies the Ruby version required by the application. The Ruby version will be installed during deployment, and the gems specified in the gems array will be installed with rbenv instead of the default ruby.
 
 # Database and memcached block parameters
 

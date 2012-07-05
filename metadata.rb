@@ -5,6 +5,6 @@ description      "Deploys and configures Ruby-based applications"
 long_description  IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          "1.0.0"
 
-%w{ application runit unicorn apache2 passenger_apache2 }.each do |cb|
+%w{ application runit unicorn apache2 passenger_apache2 rbenv ruby_build }.each do |cb|
   depends cb
 end

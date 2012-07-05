@@ -18,10 +18,18 @@
 # limitations under the License.
 #
 
+include Chef::Mixin::LanguageIncludeRecipe
+
 action :before_compile do
 
   if new_resource.bundler.nil?
     new_resource.bundler new_resource.gems.any? { |gem, ver| gem == 'bundler' }
+  end
+
+  unless new_resource.rbenv_version.nil?
+    include_recipe 'ruby_build'
+    include_recipe 'rbenv::system_install'
+    rbenv_ruby new_resource.rbenv_version
   end
 
   unless new_resource.migration_command
@@ -77,10 +85,11 @@ action :before_migrate do
       # Check for a Gemfile.lock
       bundler_deployment = ::File.exists?(::File.join(new_resource.release_path, "Gemfile.lock"))
     end
+    rbenv_env = new_resource.rbenv_version.nil? ? {} : { 'PATH' => "/usr/local/rbenv/shims:/usr/local/rbenv/bin/:#{ENV['PATH']}" }
     execute "bundle install --path=vendor/bundle #{bundler_deployment ? "--deployment " : ""}--without #{common_groups}" do
       cwd new_resource.release_path
       user new_resource.owner
-      environment new_resource.environment
+      environment new_resource.environment.merge(rbenv_env)
     end
   else
     # chef runs before_migrate, then symlink_before_migrate symlinks, then migrations,
@@ -149,11 +158,23 @@ def install_gems
     elsif opt.is_a?(String)
       ver = opt
     end
-    gem_package gem do
-      action :install
-      source src if src
-      version ver if ver && ver.length > 0
+    if new_resource.rbenv_version.nil?
+      gem_package gem do
+        action :install
+        source src if src
+        version ver if ver && ver.length > 0
+      end
+    else
+      rbenv_gem gem do
+        action :install
+        rbenv_version new_resource.rbenv_version
+        source src if src
+        version ver if ver && ver.length > 0
+      end
     end
+  end
+  unless new_resource.rbenv_version.nil?
+    rbenv_rehash 'rbenv rehash'
   end
 end
 
