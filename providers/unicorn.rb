@@ -31,7 +31,7 @@ action :before_compile do
     include_recipe "unicorn"
   end
 
-  new_resource.restart_command "/etc/init.d/#{new_resource.name} hup" if !new_resource.restart_command
+  new_resource.restart_command "/etc/init.d/#{new_resource.name} restart" if !new_resource.restart_command
 
 end
 
