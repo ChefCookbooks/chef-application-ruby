@@ -28,7 +28,7 @@ action :before_compile do
 
   unless new_resource.rbenv_version.nil?
     include_recipe 'ruby_build'
-    include_recipe 'rbenv::system_install'
+    include_recipe 'rbenv'
     rbenv_ruby new_resource.rbenv_version
   end
 
@@ -46,6 +46,15 @@ action :before_compile do
   new_resource.symlink_before_migrate.update({
     "database.yml" => "config/database.yml"
   })
+
+  unless new_resource.restart_command
+    new_resource.restart_command do
+      new_resource.rake_tasks.each do |task|
+        service_name = task_to_service_name(task)
+        execute "/etc/init.d/#{service_name} restart"
+      end
+    end
+  end
 
 end
 
@@ -130,18 +139,39 @@ action :before_symlink do
   end
 
   if new_resource.precompile_assets
+    rbenv_env = new_resource.rbenv_version.nil? ? {} : { 'PATH' => "/usr/local/rbenv/shims:/usr/local/rbenv/bin/:#{ENV['PATH']}" }
     command = "rake assets:precompile"
     command = "bundle exec #{command}" if new_resource.bundler
     execute command do
       cwd new_resource.release_path
       user new_resource.owner
-      environment new_resource.environment
+      environment new_resource.environment.merge(rbenv_env)
     end
   end
 
 end
 
 action :before_restart do
+
+  new_resource = @new_resource
+  new_resource.rake_tasks.each do |task|
+
+    service_name = task_to_service_name(task)
+
+    runit_service service_name do
+      template_name 'rake_task'
+
+      cookbook 'application_ruby'
+      options(
+        :task => task,
+        :app => new_resource,
+        :rails_env => new_resource.environment_name,
+        :rbenv_version => new_resource.rbenv_version
+      )
+      run_restart false
+    end
+  end
+  
 end
 
 action :after_restart do
@@ -193,4 +223,8 @@ def create_database_yml
       :rails_env => new_resource.environment_name
     )
   end
+end
+
+def task_to_service_name(task_name)
+  task_name.gsub(/\:/, '_')
 end
