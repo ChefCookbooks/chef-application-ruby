@@ -2,5 +2,9 @@
 
 cd <%= @options[:app].path %>/current
 
+<% unless @options[:rbenv_version].nil? -%>
+PATH=/usr/local/rbenv/shims:/usr/local/rbenv/bin/:$PATH
+<% end -%>
+
 exec 2>&1
 exec chpst -u <%= @options[:app].owner %>:<%= @options[:app].group %> <%= @options[:app].bundler ? 'bundle exec' : '' %> <%= @options[:smells_like_rack] ? 'unicorn' : 'unicorn_rails' %> -E <%= @options[:rails_env] %> -c /etc/unicorn/<%= @options[:app].application.name %>.rb

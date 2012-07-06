@@ -48,6 +48,10 @@ action :before_restart do
 
   new_resource = @new_resource
 
+  # Determine if we need Rbenv to run this application.
+  rbenv_file = ::File.join(new_resource.path, "current", ".rbenv-version")
+  rbenv_version = ::File.exists?(rbenv_file) ? ::File.read(rbenv_file) : nil
+
   unicorn_config "/etc/unicorn/#{new_resource.name}.rb" do
     listen({ new_resource.port => new_resource.options })
     working_directory ::File.join(new_resource.path, 'current')
@@ -66,6 +70,7 @@ action :before_restart do
     options(
       :app => new_resource,
       :rails_env => new_resource.environment_name,
+      :rbenv_version => rbenv_version,
       :smells_like_rack => ::File.exists?(::File.join(new_resource.path, "current", "config.ru"))
     )
     run_restart false
