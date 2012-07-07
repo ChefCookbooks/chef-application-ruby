@@ -7,4 +7,4 @@ PATH=/usr/local/rbenv/shims:/usr/local/rbenv/bin/:$PATH
 <% end -%>
 
 exec 2>&1
-exec chpst -u <%= @options[:app].owner %>:<%= @options[:app].group %> <%= @options[:app].bundler ? 'bundle exec' : '' %> rake <%= @options[:task] %>
+RAILS_ENV=<%= @options[:app].environment_name %> exec chpst -u <%= @options[:app].owner %>:<%= @options[:app].group %> <%= @options[:app].bundler ? 'bundle exec' : '' %> rake <%= @options[:task] %>
