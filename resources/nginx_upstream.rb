@@ -20,3 +20,5 @@
 include Chef::Resource::ApplicationBase
 
 attribute :server_aliases, :kind_of => [Array, NilClass], :default => nil
+# Actually defaults to "#{application.name}.conf.erb", but nil means it wasn't set by the user
+attribute :config_template, :kind_of => [String, NilClass], :default => nil

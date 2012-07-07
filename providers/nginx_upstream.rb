@@ -41,8 +41,8 @@ action :before_deploy do
 
   # Write the Nginx configuration.
   template "/etc/nginx/sites-available/#{new_resource.application.name}.conf" do
-    source 'nginx-upstream.conf.erb'
-    cookbook 'application_ruby'
+    source new_resource.config_template || "#{new_resource.application.name}.conf.erb"
+    cookbook new_resource.cookbook_name
     variables(
       :app => new_resource,
       :server_name => "#{new_resource.application.name}.#{node['domain']}"
@@ -57,4 +57,16 @@ action :before_deploy do
     enable false
   end
 
+end
+
+action :before_migrate do
+end
+
+action :before_symlink do
+end
+
+action :before_restart do
+end
+
+action :after_restart do
 end
