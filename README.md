@@ -7,6 +7,7 @@ This cookbook is designed to be able to describe and deploy Ruby web application
 * Apache 2 with Passenger
 * Unicorn
 * Memcached client
+* Nginx upstream proxy
 
 Note that this cookbook provides the Ruby-specific bindings for the `application` cookbook; you will find general documentation in that cookbook.
 
@@ -24,6 +25,7 @@ The following Opscode cookbooks are dependencies:
 * passenger_apache2
 * runit
 * unicorn
+* nginx_upstream
 
 Resources/Providers
 ==========
@@ -102,6 +104,16 @@ The `memcached` sub-resource LWRP manages configuration for a Rails-compatible M
 - role: a Chef search will be run to find a node with than role in the same environment as the current node. If a node is found, its IP address will be used when rendering the `memcached.yml` file.
 - options: a block containing additional parameters for configuring the memcached client
 
+nginx\_upstream
+---------------
+
+The `nginx_upstream` sub-resource LWRP configures Nginx as an upstream server to front the Unicorn instances serving the application.
+
+# Attribute Parameters
+
+- server\_aliases: an Array of server aliases.
+
+The `nginx
 Usage
 =====
 
