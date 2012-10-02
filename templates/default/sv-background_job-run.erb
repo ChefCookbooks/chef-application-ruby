@@ -1,0 +1,10 @@
+#!/bin/bash
+
+cd <%= @options[:app].path %>/current
+
+<% unless @options[:rbenv_version].nil? -%>
+PATH=/usr/local/rbenv/shims:/usr/local/rbenv/bin/:$PATH
+<% end -%>
+
+exec 2>&1
+RAILS_ENV=<%= @options[:app].environment_name %> exec chpst -u <%= @options[:app].owner %>:<%= @options[:app].group %> <%= @options[:app].bundler ? 'bundle exec' : '' %> <%= @options[:command] %>

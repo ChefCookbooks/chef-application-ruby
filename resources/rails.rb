@@ -29,7 +29,7 @@ attribute :bundler_deployment, :kind_of => [NilClass, TrueClass, FalseClass], :d
 attribute :bundler_without_groups, :kind_of => [Array], :default => []
 attribute :precompile_assets, :kind_of => [NilClass, TrueClass, FalseClass], :default => nil
 attribute :rbenv_version, :kind_of => [NilClass, String], :default => nil
-attribute :rake_tasks, :kind_of => [Array], :default => []
+attribute :background_jobs, :kind_of => [Hash], :default => {}
 
 def database(*args, &block)
   @database ||= Mash.new

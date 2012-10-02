@@ -49,9 +49,8 @@ action :before_compile do
 
   unless new_resource.restart_command
     new_resource.restart_command do
-      new_resource.rake_tasks.each do |task|
-        service_name = task_to_service_name(task)
-        execute "/etc/init.d/#{service_name} restart"
+      new_resource.background_jobs.each do |task_name, task_command|
+        execute "/etc/init.d/#{task_name} restart"
       end
     end
   end
@@ -154,16 +153,14 @@ end
 action :before_restart do
 
   new_resource = @new_resource
-  new_resource.rake_tasks.each do |task|
+  new_resource.background_jobs.each do |task_name, task_command|
 
-    service_name = task_to_service_name(task)
-
-    runit_service service_name do
-      template_name 'rake_task'
+    runit_service task_name do
+      template_name 'background_job'
 
       cookbook 'application_ruby'
       options(
-        :task => task,
+        :command => task_command,
         :app => new_resource,
         :rails_env => new_resource.environment_name,
         :rbenv_version => new_resource.rbenv_version
@@ -223,8 +220,4 @@ def create_database_yml
       :rails_env => new_resource.environment_name
     )
   end
-end
-
-def task_to_service_name(task_name)
-  task_name.gsub(/\:/, '_')
 end
