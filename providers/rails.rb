@@ -50,7 +50,7 @@ action :before_compile do
   unless new_resource.restart_command
     new_resource.restart_command do
       new_resource.background_jobs.each do |task_name, task_command|
-        execute "/etc/init.d/#{task_name} restart"
+        execute "/etc/init.d/#{task_name} -w 60 restart"
       end
     end
   end
